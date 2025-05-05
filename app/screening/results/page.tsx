@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -13,7 +14,7 @@ const ageGroupLabels: Record<string, string> = {
   '5-6-years': '5-6 years',
 };
 
-export default function ResultsPage() {
+function ResultsContent() {
   const searchParams = useSearchParams();
   const ageGroup = searchParams.get('age');
   
@@ -62,5 +63,21 @@ export default function ResultsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-12 max-w-3xl text-center">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-8">
+          <p className="text-center text-lg mb-6">
+            Loading results...
+          </p>
+        </div>
+      </div>
+    }>
+      <ResultsContent />
+    </Suspense>
   );
 } 

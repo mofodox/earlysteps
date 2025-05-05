@@ -1,9 +1,10 @@
 "use client";
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { QuestionForm } from '.';
 
-export default function QuestionsPage() {
+function QuestionsContent() {
   const searchParams = useSearchParams();
   const ageGroup = searchParams.get('age');
   
@@ -28,5 +29,21 @@ export default function QuestionsPage() {
       
       <QuestionForm ageGroup={ageGroup} />
     </div>
+  );
+}
+
+export default function QuestionsPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-12 max-w-3xl text-center">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-8">
+          <p className="text-center text-lg mb-6">
+            Loading questions...
+          </p>
+        </div>
+      </div>
+    }>
+      <QuestionsContent />
+    </Suspense>
   );
 } 
