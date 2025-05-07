@@ -80,7 +80,7 @@ export function Navbar() {
       </header>
       
       {/* Spacer to prevent content from being hidden behind fixed navbar */}
-      <div className="h-[64px] md:h-[48px]"></div>
+      <div className="h-[64px]"></div>
     </>
   );
 } 

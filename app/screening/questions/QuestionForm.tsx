@@ -114,7 +114,6 @@ export function QuestionForm({ ageGroup }: { ageGroup: string }) {
     const currentDomainIndex = allDomains.indexOf(currentDomain);
     if (currentDomainIndex < allDomains.length - 1) {
       setCurrentDomain(allDomains[currentDomainIndex + 1]);
-      window.scrollTo(0, 0);
     } else {
       // Navigate to results page
       handleSubmit();
@@ -125,7 +124,6 @@ export function QuestionForm({ ageGroup }: { ageGroup: string }) {
     const currentDomainIndex = allDomains.indexOf(currentDomain);
     if (currentDomainIndex > 0) {
       setCurrentDomain(allDomains[currentDomainIndex - 1]);
-      window.scrollTo(0, 0);
     }
   };
 
@@ -138,8 +136,8 @@ export function QuestionForm({ ageGroup }: { ageGroup: string }) {
     const allAnswered = Object.values(answers).every(a => a !== '');
     
     if (allAnswered) {
-      // For now, just console log the answers
-      console.log('All answers:', answers);
+      // Store answers in localStorage for the results page to use
+      localStorage.setItem('screeningAnswers', JSON.stringify(answers));
       
       // In a real app, you'd submit the data to your backend
       // Then navigate to a results page
@@ -162,77 +160,86 @@ export function QuestionForm({ ageGroup }: { ageGroup: string }) {
   const progressPercentage = ((currentDomainIndex + 1) / totalSteps) * 100;
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+    <div className="max-w-3xl mx-auto h-full flex flex-col">
+      <div className="bg-white rounded-3xl shadow-lg border border-gray-200 p-6 md:p-8 flex-grow flex flex-col">
         <div className="mb-4">
           <div className="flex justify-between items-center mb-1">
             <h2 className="text-2xl font-bold">{formattedAgeGroup}</h2>
-            <span className="text-sm font-medium">Step {currentDomainIndex + 1} of {totalSteps}</span>
+            <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+              Step {currentDomainIndex + 1} of {totalSteps}
+            </span>
           </div>
           
           {currentDomain && domains[currentDomain] && (
-            <h3 className="text-base font-medium text-gray-700 mb-2">
+            <h3 className="text-xl font-semibold text-gray-800 mb-1">
               {domains[currentDomain].name}
             </h3>
           )}
+
+          {currentDomain && domains[currentDomain] && (
+            <p className="text-sm text-gray-600 mb-4">
+              {domains[currentDomain].description}
+            </p>
+          )}
           
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
             <div 
-              className="bg-red-500 h-2 rounded-full" 
+              className="bg-gradient-to-r from-red-500 to-red-600 h-2.5 rounded-full transition-all duration-300" 
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
         </div>
 
-        <div className="space-y-6 mb-6">
-          {currentQuestions.map((question, index) => (
-            <div key={question.id}>
-              <p className="font-medium mb-3">{question.text}</p>
-              <div className="flex gap-3">
-                <label className="flex items-center space-x-2 py-1.5 px-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                  <input
-                    type="radio"
-                    name={question.id}
-                    value="yes"
-                    checked={answers[question.id] === 'yes'}
-                    onChange={() => handleAnswer(question.id, 'yes')}
-                    className="w-4 h-4 text-red-500 focus:ring-red-400 border-gray-300"
-                  />
-                  <span>Yes</span>
-                </label>
-                
-                <label className="flex items-center space-x-2 py-1.5 px-3 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                  <input
-                    type="radio"
-                    name={question.id}
-                    value="no"
-                    checked={answers[question.id] === 'no'}
-                    onChange={() => handleAnswer(question.id, 'no')}
-                    className="w-4 h-4 text-red-500 focus:ring-red-400 border-gray-300"
-                  />
-                  <span>No</span>
-                </label>
+        <div className="flex-grow overflow-y-auto pr-2 mb-6 max-h-[calc(100vh-350px)]">
+          <div className="space-y-6">
+            {currentQuestions.map((question, index) => (
+              <div key={question.id} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                <p className="font-medium mb-3 text-gray-800">{question.text}</p>
+                <div className="flex gap-3">
+                  <label className="flex items-center space-x-2 py-2 px-4 rounded-lg border border-gray-200 hover:bg-white hover:border-red-200 cursor-pointer transition-colors">
+                    <input
+                      type="radio"
+                      name={question.id}
+                      value="yes"
+                      checked={answers[question.id] === 'yes'}
+                      onChange={() => handleAnswer(question.id, 'yes')}
+                      className="w-4 h-4 text-red-500 focus:ring-red-400 border-gray-300"
+                    />
+                    <span>Yes</span>
+                  </label>
+                  
+                  <label className="flex items-center space-x-2 py-2 px-4 rounded-lg border border-gray-200 hover:bg-white hover:border-red-200 cursor-pointer transition-colors">
+                    <input
+                      type="radio"
+                      name={question.id}
+                      value="no"
+                      checked={answers[question.id] === 'no'}
+                      onChange={() => handleAnswer(question.id, 'no')}
+                      className="w-4 h-4 text-red-500 focus:ring-red-400 border-gray-300"
+                    />
+                    <span>No</span>
+                  </label>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between mt-auto pt-4 border-t border-gray-100">
             {allDomains.indexOf(currentDomain) > 0 ? (
                 <button
                 type="button"
                 onClick={handlePreviousDomain}
-                className="px-4 py-1.5 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium"
+                className="px-5 py-2.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium transition-colors"
                 >
                 Previous
                 </button>
             ) : (
                 <Link
                 href="/screening"
-                type="button"
-                className="px-4 py-1.5 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium"
+                className="px-5 py-2.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium transition-colors"
                 >
-                Previous
+                Back
                 </Link>
             )}
 
@@ -240,13 +247,13 @@ export function QuestionForm({ ageGroup }: { ageGroup: string }) {
                 type="button"
                 onClick={handleNextDomain}
                 disabled={!areAllQuestionsAnswered()}
-                className={`px-4 py-1.5 rounded-md font-medium ${
+                className={`px-5 py-2.5 rounded-lg font-medium transition-all ${
                 areAllQuestionsAnswered()
-                    ? 'bg-red-500 text-white hover:bg-red-600 cursor-pointer'
+                    ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 hover:shadow-md'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
             >
-                Next
+                {currentDomainIndex < allDomains.length - 1 ? 'Next' : 'Complete'}
             </button>
         </div>
       </div>
