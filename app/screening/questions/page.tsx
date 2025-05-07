@@ -39,7 +39,7 @@ function QuestionsContent() {
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8 mt-4">
+          <div className="text-center mb-8 md:mt-10">
             <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Developmental Screening</h1>
             <div className="inline-flex items-center justify-center px-4 py-1 rounded-full bg-red-100 text-red-600 font-medium text-sm mb-4">
               Answer Questions
