@@ -26,22 +26,63 @@ export function ScreeningForm() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    return () => setIsMounted(false);
+    
+    // Check if we're on a mobile device
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Initial check
+    checkMobile();
+    
+    // Add resize listener
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      setIsMounted(false);
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
-        width: rect.width
-      });
+      const viewportHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+      
+      // Calculate available space below the button
+      const spaceBelow = viewportHeight - rect.bottom;
+      // Maximum height for the dropdown (35vh for mobile, 240px for desktop)
+      const maxDropdownHeight = isMobile ? viewportHeight * 0.35 : 240;
+      
+      // Check if there's enough space below
+      const shouldPositionAbove = spaceBelow < maxDropdownHeight && rect.top > maxDropdownHeight;
+      
+      if (isMobile) {
+        // Mobile positioning - centered with fixed width
+        setDropdownPosition({
+          top: shouldPositionAbove 
+            ? rect.top + scrollY - maxDropdownHeight - 5 // Position above with small gap
+            : rect.bottom + scrollY + 5, // Position below with small gap
+          left: Math.max(10, rect.left + window.scrollX), // Ensure at least 10px from left edge
+          width: Math.min(rect.width, window.innerWidth - 20) // Ensure not wider than viewport minus margins
+        });
+      } else {
+        // Desktop positioning
+        setDropdownPosition({
+          top: shouldPositionAbove
+            ? rect.top + scrollY - maxDropdownHeight
+            : rect.bottom + scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   const handleSelect = (ageGroupId: string) => {
     setSelectedAgeGroup(ageGroupId);
@@ -59,13 +100,14 @@ export function ScreeningForm() {
 
     return createPortal(
       <ul 
-        className="z-50 fixed bg-white rounded-xl shadow-xl max-h-60 overflow-y-auto focus:outline-none ring-1 ring-black ring-opacity-5"
+        className="z-50 fixed bg-white rounded-xl shadow-xl overflow-y-auto focus:outline-none ring-1 ring-black ring-opacity-5"
         role="listbox"
         style={{ 
           top: `${dropdownPosition.top}px`, 
           left: `${dropdownPosition.left}px`, 
           width: `${dropdownPosition.width}px`,
-          maxHeight: '240px' 
+          maxHeight: isMobile ? '35vh' : '240px', // Use viewport height for mobile
+          overflowY: 'auto'
         }}
       >
         {ageGroups.map((ageGroup) => (
